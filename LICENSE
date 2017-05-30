@@ -1,20 +1,3 @@
-Crate
-Copyright 2013-2016 Crate.IO GmbH ("Crate")
-
-
-Licensed to Crate.IO GmbH (referred to in this notice as "Crate")
-under one or more contributor license agreements.  See the NOTICE file
-distributed with this work for additional information regarding copyright
-ownership.
-
-Crate licenses this software to you under the Apache License, Version 2.0.
-However, if you have executed another commercial license agreement with
-Crate these terms will supersede the license and you may use the software
-solely pursuant to the terms of the relevant commercial agreement.
-
-
-=========================================================================
-
 
                                  Apache License
                            Version 2.0, January 2004
@@ -217,3 +200,199 @@ solely pursuant to the terms of the relevant commercial agreement.
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+================================================================================
+
+For the `es/upstream` directory:
+
+NOTE: in the source repository, this directory is configured as a Git submodule.
+
+Elasticsearch
+Copyright 2009-2017 Elasticsearch
+
+Licensed under the Apache License, Version 2.0 (see above for full license
+text).
+
+Elasticsearch bundles a number of third-party components. For a full list of
+the respective licenses, consult the relevant LICENSE.txt files included with
+the source code.
+
+As a general guideline, it is a policy of the Apache Software Foundation that
+all bundled third-party components should be available under a category A
+license (https://www.apache.org/legal/resolved.html#category-a).
+
+
+================================================================================
+
+Presto (SQL Parser)
+http://prestodb.io
+developed by Facebook (https://github.com/facebook/presto)
+License: Apache License v2 (http://www.apache.org/licenses)
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+Netty
+http://netty.io
+developed by The Netty Project
+License: Apache License v2 (http://www.apache.org/licenses)
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+SRV Discovery Plugin for Elasticsearch
+https://github.com/grantr/elasticsearch-srv-discovery
+developed by Grant Rodgers
+License: MIT License, http://www.opensource.org/licenses/mit-license.php
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+AWS Cloud Plugin for Elasticsearch
+https://github.com/elastic/elasticsearch-cloud-aws
+developed by Elastic
+License: Apache License v2 (http://www.apache.org/licenses)
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+Meyer CSS reset
+http://meyerweb.com/eric/tools/css/reset/
+License: none (public domain)
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+normalize.css
+http://github.com/necolas/normalize.css
+Copyright (c) Nicolas Gallagher and Jonathan Neal
+License: https://github.com/necolas/normalize.css/blob/master/LICENSE.md
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+CSS3-mediaqueries.js
+http://code.google.com/p/css3-mediaqueries-js/
+License: MIT License, http://www.opensource.org/licenses/mit-license.php
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+jQuery
+Copyright 2012 jQuery Foundation and other contributors
+http://jquery.com
+License: MIT License, http://jquery.org/license/
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+Mustache.js
+Copyright (c) 2009 Chris Wanstrath (Ruby)
+Copyright (c) 2010 Jan Lehnardt (JavaScript)
+http://mustache.github.com
+License: MIT License
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+Raphael
+http://raphaeljs.com, from fork at git@github.com:mobz/g.raphael.git
+Copyright (c) 2010 Dmitry Baranovskiy
+License: MIT (http://raphaeljs.com/license.htm
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+date-range-parser
+https://github.com/mobz/date-range-parser
+Contributed to the Apache Software Foundation by Ben Birch - Aconex
+License: Apache License v2 (http://www.apache.org/licenses)
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+For the `blackbox/docs/_static/bootstrap*` files:
+
+Bootstrap
+https://getbootstrap.com
+Copyright 2012 Twitter, Inc.
+License: Apache License v2 (http://www.apache.org/licenses)
+
+FIXME: can probably be removed?
+
+
+================================================================================
+
+'SB Admin' HTML Template
+http://startbootstrap.com
+Copyright 2013 Iron Summit Media Strategies
+License: Apache License v2 (http://www.apache.org/licenses)
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+AngularJS
+http://angularjs.org
+Copyright 2010-2014 Google, Inc
+License: MIT (https://github.com/angular/angular.js/blob/master/LICENSE)
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
+
+
+================================================================================
+
+Various Components of Lovely Systems GmbH
+http://www.lovelysystems.com
+Copyright Lovely Systems GmbH
+License: Apache 2.0 (http://www.apache.org/licenses)
+
+FIXME: can we specifically identify what this refers to? if not, let's remove
+
+
+================================================================================
+
+Apache XBean
+http://geronimo.apache.org/xbean/
+Copyright Apache Software Foundation
+License: Apache License v2 (http://www.apache.org/licenses)
+
+FIXME: I cannot find this source code in our Git repository. am I correct in
+thinking this is no longer used or is a build time inclusion?
