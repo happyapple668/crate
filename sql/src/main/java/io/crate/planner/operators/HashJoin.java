@@ -23,7 +23,6 @@
 package io.crate.planner.operators;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import io.crate.analyze.OrderBy;
 import io.crate.analyze.relations.AnalyzedRelation;
 import io.crate.collections.Lists2;
@@ -127,15 +126,16 @@ class HashJoin extends TwoInputPlan {
 
         ResultDescription leftResultDesc = leftExecutionPlan.resultDescription();
         ResultDescription rightResultDesc = rightExecutionPlan.resultDescription();
-        Collection<String> nlExecutionNodes = ImmutableSet.of(plannerContext.handlerNode());
+        //Collection<String> nlExecutionNodes = ImmutableSet.of(plannerContext.handlerNode());
+        Collection<String> nlExecutionNodes = leftResultDesc.nodeIds();
 
         MergePhase leftMerge = null;
         MergePhase rightMerge = null;
-        leftExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_BROADCAST);
-        if (JoinOperations.isMergePhaseNeeded(nlExecutionNodes, leftResultDesc, false)) {
+        leftExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_MODULO);
+        if (JoinOperations.isMergePhaseNeeded(nlExecutionNodes, leftResultDesc, true)) {
             leftMerge = JoinOperations.buildMergePhaseForJoin(plannerContext, leftResultDesc, nlExecutionNodes);
         }
-        if (nlExecutionNodes.size() == 1
+        if (nlExecutionNodes.size() == 0
             && nlExecutionNodes.equals(rightResultDesc.nodeIds())
             && !rightResultDesc.hasRemainingLimitOrOffset()) {
             // if the left and the right plan are executed on the same single node the mergePhase
@@ -143,10 +143,10 @@ class HashJoin extends TwoInputPlan {
             // are on the same node
             rightExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_SAME_NODE);
         } else {
-            if (JoinOperations.isMergePhaseNeeded(nlExecutionNodes, rightResultDesc, false)) {
+            rightExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_MODULO);
+            if (JoinOperations.isMergePhaseNeeded(nlExecutionNodes, rightResultDesc, true)) {
                 rightMerge = JoinOperations.buildMergePhaseForJoin(plannerContext, rightResultDesc, nlExecutionNodes);
             }
-            rightExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_BROADCAST);
         }
 
         Symbol joinConditionInput = InputColumns.create(
