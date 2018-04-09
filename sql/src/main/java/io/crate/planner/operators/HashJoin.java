@@ -126,17 +126,16 @@ class HashJoin extends TwoInputPlan {
 
         ResultDescription leftResultDesc = leftExecutionPlan.resultDescription();
         ResultDescription rightResultDesc = rightExecutionPlan.resultDescription();
-        //Collection<String> nlExecutionNodes = ImmutableSet.of(plannerContext.handlerNode());
-        Collection<String> nlExecutionNodes = leftResultDesc.nodeIds();
+        Collection<String> joinExecutionNodes = leftResultDesc.nodeIds();
 
         MergePhase leftMerge = null;
         MergePhase rightMerge = null;
         leftExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_MODULO);
-        if (JoinOperations.isMergePhaseNeeded(nlExecutionNodes, leftResultDesc, true)) {
-            leftMerge = JoinOperations.buildMergePhaseForJoin(plannerContext, leftResultDesc, nlExecutionNodes);
+        if (JoinOperations.isMergePhaseNeeded(joinExecutionNodes, leftResultDesc, true)) {
+            leftMerge = JoinOperations.buildMergePhaseForJoin(plannerContext, leftResultDesc, joinExecutionNodes);
         }
-        if (nlExecutionNodes.size() == 0
-            && nlExecutionNodes.equals(rightResultDesc.nodeIds())
+        if (joinExecutionNodes.size() == 1
+            && joinExecutionNodes.equals(rightResultDesc.nodeIds())
             && !rightResultDesc.hasRemainingLimitOrOffset()) {
             // if the left and the right plan are executed on the same single node the mergePhase
             // should be omitted. This is the case if the left and right table have only one shards which
@@ -144,8 +143,8 @@ class HashJoin extends TwoInputPlan {
             rightExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_SAME_NODE);
         } else {
             rightExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_MODULO);
-            if (JoinOperations.isMergePhaseNeeded(nlExecutionNodes, rightResultDesc, true)) {
-                rightMerge = JoinOperations.buildMergePhaseForJoin(plannerContext, rightResultDesc, nlExecutionNodes);
+            if (JoinOperations.isMergePhaseNeeded(joinExecutionNodes, rightResultDesc, true)) {
+                rightMerge = JoinOperations.buildMergePhaseForJoin(plannerContext, rightResultDesc, joinExecutionNodes);
             }
         }
 
@@ -174,7 +173,7 @@ class HashJoin extends TwoInputPlan {
             rightMerge,
             leftLogicalPlan.outputs().size(),
             rightLogicalPlan.outputs().size(),
-            nlExecutionNodes,
+            joinExecutionNodes,
             joinConditionInput,
             hashInputs.v1(),
             hashInputs.v2(),
