@@ -65,6 +65,7 @@ import io.crate.test.integration.CrateDummyClusterServiceUnitTest;
 import io.crate.testing.SQLExecutor;
 import io.crate.testing.T3;
 import io.crate.testing.TestingHelpers;
+import io.crate.testing.UseHashJoins;
 import io.crate.types.DataTypes;
 import org.apache.lucene.util.BytesRef;
 import org.hamcrest.Matchers;
@@ -538,6 +539,7 @@ public class SelectPlannerTest extends CrateDummyClusterServiceUnitTest {
     }
 
     @Test
+    @UseHashJoins(0)    // disable hash joins otherwise it will be a distributed join and the plan differs
     public void testOuterJoinToInnerJoinRewrite() throws Exception {
         QueryThenFetch qtf = e.plan("select u1.text, u2.text " +
                                   "from users u1 left join users u2 on u1.id = u2.id " +

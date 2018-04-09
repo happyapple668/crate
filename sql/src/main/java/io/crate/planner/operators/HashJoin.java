@@ -34,14 +34,18 @@ import io.crate.execution.dsl.projection.builder.InputColumns;
 import io.crate.execution.dsl.projection.builder.ProjectionBuilder;
 import io.crate.execution.engine.join.JoinOperations;
 import io.crate.execution.engine.pipeline.TopN;
+import io.crate.expression.symbol.Function;
+import io.crate.expression.symbol.InputColumn;
 import io.crate.expression.symbol.SelectSymbol;
 import io.crate.expression.symbol.Symbol;
+import io.crate.expression.symbol.SymbolVisitor;
 import io.crate.expression.symbol.Symbols;
 import io.crate.planner.ExecutionPlan;
 import io.crate.planner.PlannerContext;
 import io.crate.planner.ResultDescription;
 import io.crate.planner.TableStats;
 import io.crate.planner.distribution.DistributionInfo;
+import io.crate.planner.distribution.DistributionType;
 import io.crate.planner.node.dql.join.Join;
 import io.crate.planner.node.dql.join.JoinType;
 import org.elasticsearch.common.collect.Tuple;
@@ -124,16 +128,29 @@ class HashJoin extends TwoInputPlan {
             rightExecutionPlan = tmp;
         }
 
+        Tuple<List<Symbol>, List<Symbol>> hashInputs =
+            extractHashJoinInputsFromJoinSymbolsAndSplitPerSide(tablesSwitched);
+
         ResultDescription leftResultDesc = leftExecutionPlan.resultDescription();
-        ResultDescription rightResultDesc = rightExecutionPlan.resultDescription();
-        Collection<String> joinExecutionNodes = leftResultDesc.nodeIds();
+        Collection<String> joinExecutionNodes;
+        boolean isDistributed = true;
+        if (isDistributed) {
+            joinExecutionNodes = leftResultDesc.nodeIds();
+        } else {
+            joinExecutionNodes = Collections.singletonList(plannerContext.handlerNode());
+        }
 
         MergePhase leftMerge = null;
         MergePhase rightMerge = null;
-        leftExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_MODULO);
-        if (JoinOperations.isMergePhaseNeeded(joinExecutionNodes, leftResultDesc, true)) {
+        leftExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_BROADCAST);
+        if (isDistributed) {
             leftMerge = JoinOperations.buildMergePhaseForJoin(plannerContext, leftResultDesc, joinExecutionNodes);
+            Integer distributeByColumn = DistributionColumnExtractor.getColumnIndex(hashInputs.v1().get(0));
+            assert distributeByColumn != null : "could not resolve the left distributeBy column index";
+            leftExecutionPlan.setDistributionInfo(new DistributionInfo(DistributionType.MODULO, distributeByColumn));
         }
+
+        ResultDescription rightResultDesc = rightExecutionPlan.resultDescription();
         if (joinExecutionNodes.size() == 1
             && joinExecutionNodes.equals(rightResultDesc.nodeIds())
             && !rightResultDesc.hasRemainingLimitOrOffset()) {
@@ -142,18 +159,14 @@ class HashJoin extends TwoInputPlan {
             // are on the same node
             rightExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_SAME_NODE);
         } else {
-            rightExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_MODULO);
-            if (JoinOperations.isMergePhaseNeeded(joinExecutionNodes, rightResultDesc, true)) {
+            rightExecutionPlan.setDistributionInfo(DistributionInfo.DEFAULT_BROADCAST);
+            if (isDistributed) {
                 rightMerge = JoinOperations.buildMergePhaseForJoin(plannerContext, rightResultDesc, joinExecutionNodes);
+                Integer distributeByColumn = DistributionColumnExtractor.getColumnIndex(hashInputs.v2().get(0));
+                assert distributeByColumn != null : "could not resolve the right distributeBy column index";
+                rightExecutionPlan.setDistributionInfo(new DistributionInfo(DistributionType.MODULO, distributeByColumn));
             }
         }
-
-        Symbol joinConditionInput = InputColumns.create(
-            joinCondition,
-            Lists2.concat(leftLogicalPlan.outputs(), rightLogicalPlan.outputs()));
-        Tuple<List<Symbol>, List<Symbol>> hashInputs =
-            extractHashJoinInputsFromJoinSymbolsAndSplitPerSide(tablesSwitched);
-
 
         List<Symbol> joinOutputs = Lists2.concat(leftLogicalPlan.outputs(), rightLogicalPlan.outputs());
         // The projection operates on the the outputs of the join operation, which may be inverted due to a table switch,
@@ -162,6 +175,10 @@ class HashJoin extends TwoInputPlan {
         List<Symbol> projectionOutputs = InputColumns.create(
                 outputs,
                 new InputColumns.SourceSymbols(joinOutputs));
+
+        Symbol joinConditionInput = InputColumns.create(
+            joinCondition,
+            Lists2.concat(leftLogicalPlan.outputs(), rightLogicalPlan.outputs()));
 
         HashJoinPhase joinPhase = new HashJoinPhase(
             plannerContext.jobId(),
@@ -243,5 +260,30 @@ class HashJoin extends TwoInputPlan {
     @Override
     public <C, R> R accept(LogicalPlanVisitor<C, R> visitor, C context) {
         return visitor.visitHashJoin(this, context);
+    }
+
+    private static class DistributionColumnExtractor extends SymbolVisitor<Void, Integer> {
+
+        private static final DistributionColumnExtractor INSTANCE = new DistributionColumnExtractor();
+
+        private static Integer getColumnIndex(Symbol symbol) {
+            return INSTANCE.process(symbol, null);
+        }
+
+        @Override
+        public Integer visitFunction(Function symbol, Void context) {
+            for (Symbol arg : symbol.arguments()) {
+                Integer idx = process(arg, context);
+                if (idx != null) {
+                    return idx;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Integer visitInputColumn(InputColumn inputColumn, Void context) {
+            return inputColumn.index();
+        }
     }
 }
