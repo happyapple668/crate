@@ -31,9 +31,13 @@ import java.util.Set;
 
 import static io.crate.auth.user.User.CRATE_USER;
 import static io.crate.auth.user.UserManagerService.ALWAYS_FAIL_EXCEPTION_VALIDATOR;
+import static io.crate.auth.user.UserManagerService.ALWAYS_FAIL_EXCEPTION_VALIDATOR;
 import static io.crate.auth.user.UserManagerService.ALWAYS_FAIL_STATEMENT_VALIDATOR;
 import static io.crate.auth.user.UserManagerService.BYPASS_AUTHORIZATION_CHECKS;
 import static io.crate.auth.user.UserManagerService.NOOP_EXCEPTION_VALIDATOR;
+import static io.crate.auth.user.UserManagerService.CRATE_USER;
+import static io.crate.auth.user.UserManagerService.NOOP_EXCEPTION_VALIDATOR;
+import static io.crate.auth.user.UserManagerService.CRATE_USER;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
@@ -75,17 +79,5 @@ public class UserManagerServiceTest extends CrateDummyClusterServiceUnitTest {
     public void testGetNoopStatementValidatorForSuperUser() throws Exception {
         StatementAuthorizedValidator validator = userManagerService.getStatementValidator(CRATE_USER);
         assertThat(validator, is(BYPASS_AUTHORIZATION_CHECKS));
-    }
-
-    @Test
-    public void testGetNoopExceptionValidatorForNullUser() throws Exception {
-        ExceptionAuthorizedValidator validator = userManagerService.getExceptionValidator(null);
-        assertThat(validator, is(ALWAYS_FAIL_EXCEPTION_VALIDATOR));
-    }
-
-    @Test
-    public void testGetNoopExceptionValidatorForSuperUser() throws Exception {
-        ExceptionAuthorizedValidator validator = userManagerService.getExceptionValidator(CRATE_USER);
-        assertThat(validator, is(NOOP_EXCEPTION_VALIDATOR));
     }
 }

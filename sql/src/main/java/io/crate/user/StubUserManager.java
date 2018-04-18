@@ -23,7 +23,6 @@
 package io.crate.user;
 
 import io.crate.analyze.user.Privilege;
-import io.crate.auth.user.ExceptionAuthorizedValidator;
 import io.crate.auth.user.StatementAuthorizedValidator;
 import io.crate.auth.user.User;
 import io.crate.auth.user.UserManager;
@@ -74,12 +73,6 @@ public class StubUserManager implements UserManager {
     @Override
     public StatementAuthorizedValidator getStatementValidator(@Nullable User user) {
         return s -> {
-        };
-    }
-
-    @Override
-    public ExceptionAuthorizedValidator getExceptionValidator(@Nullable User user) {
-        return t -> {
         };
     }
 }
