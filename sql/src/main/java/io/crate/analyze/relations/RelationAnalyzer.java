@@ -271,7 +271,16 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
         List<Relation> from = node.getFrom().isEmpty() ? EMPTY_ROW_TABLE_RELATION : node.getFrom();
         statementContext.startRelation();
 
+        // JOINS in the from clause have precedence over regular tables or subqueries
+        List<Relation> deferredRelations = new ArrayList<>(from.size());
         for (Relation relation : from) {
+            if (relation instanceof Join) {
+                process(relation, statementContext);
+            } else {
+                deferredRelations.add(relation);
+            }
+        }
+        for (Relation relation : deferredRelations) {
             process(relation, statementContext);
         }
 

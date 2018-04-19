@@ -29,6 +29,7 @@ import io.crate.analyze.relations.QueriedRelation;
 import io.crate.exceptions.ColumnUnknownException;
 import io.crate.exceptions.ConversionException;
 import io.crate.exceptions.RelationUnknown;
+import io.crate.exceptions.RelationValidationException;
 import io.crate.exceptions.UnsupportedFeatureException;
 import io.crate.execution.engine.aggregation.impl.AverageAggregation;
 import io.crate.expression.operator.EqOperator;
@@ -1919,6 +1920,15 @@ public class SelectStatementAnalyzerTest extends CrateDummyClusterServiceUnitTes
         expectedException.expect(UnsupportedOperationException.class);
         expectedException.expectMessage("Cannot use relation \"foo.t1\" in subquery. Correlated subqueries are not supported");
         sqlExecutor2.analyze("select * from t1 where id = (select 1 from t1 as x where x.id = t1.id)");
+    }
+
+    @Test
+    public void testContextForExplicitJoinsPrecedesImplicitJoins() {
+        expectedException.expect(RelationValidationException.class);
+        expectedException.expectMessage("missing FROM-clause entry for relation '[doc.t1]'");
+        // Inner join has to be processed before implicit cross join.
+        // Inner join does not know about t1's fields (!)
+        analyze("select * from t1, t2 inner join t1 b on b.x = t1.x");
     }
 
     @Test
