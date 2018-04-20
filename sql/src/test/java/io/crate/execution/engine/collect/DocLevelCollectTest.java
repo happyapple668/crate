@@ -24,6 +24,7 @@ package io.crate.execution.engine.collect;
 import com.google.common.collect.ImmutableList;
 import io.crate.action.sql.SessionContext;
 import io.crate.analyze.WhereClause;
+import io.crate.auth.user.User;
 import io.crate.data.Bucket;
 import io.crate.data.Row;
 import io.crate.execution.dsl.phases.ExecutionPhase;
@@ -201,7 +202,7 @@ public class DocLevelCollectTest extends SQLTransportIntegrationTest {
     @Test
     public void testCollectWithPartitionedColumns() throws Throwable {
         RelationName relationName = new RelationName(Schemas.DOC_SCHEMA_NAME, PARTITIONED_TABLE_NAME);
-        Routing routing = schemas.getTableInfo(relationName).getRouting(
+        Routing routing = schemas.getTableInfo(User.CRATE_USER, relationName).getRouting(
             clusterService().state(),
             new RoutingProvider(Randomness.get().nextInt(), new String[0]),
             WhereClause.MATCH_ALL,

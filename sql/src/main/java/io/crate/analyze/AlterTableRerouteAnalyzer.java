@@ -47,6 +47,7 @@ public class AlterTableRerouteAnalyzer {
     public AnalyzedStatement analyze(AlterTableReroute node, Analysis context) {
         // safe to expect a `ShardedTable` since REROUTE operation is not allowed on SYS tables at all.
         ShardedTable tableInfo = schemas.getTableInfo(
+            context.sessionContext().user(),
             RelationName.of(node.table(), context.sessionContext().defaultSchema()),
             Operation.ALTER_REROUTE);
         return REROUTE_OPTION_VISITOR.process(node.rerouteOption(), new Context(tableInfo, node.table().partitionProperties()));

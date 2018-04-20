@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import io.crate.analyze.ConstraintsValidator;
+import io.crate.auth.user.User;
 import io.crate.data.ArrayRow;
 import io.crate.data.Input;
 import io.crate.data.Row;
@@ -139,7 +140,12 @@ public class TransportShardUpsertAction extends TransportShardAction<ShardUpsert
                                                                                         ShardUpsertRequest request,
                                                                                         AtomicBoolean killed) throws InterruptedException {
         ShardResponse shardResponse = new ShardResponse();
-        DocTableInfo tableInfo = schemas.getTableInfo(RelationName.fromIndexName(request.index()), Operation.INSERT);
+        DocTableInfo tableInfo = schemas.getTableInfo(
+            // Super user because if we got here the actual user had enough permissions to invoke the query.
+            User.CRATE_USER,
+            RelationName.fromIndexName(request.index()),
+            Operation.INSERT
+        );
 
         Collection<ColumnIdent> notUsedNonGeneratedColumns = ImmutableList.of();
         if (request.validateConstraints()) {

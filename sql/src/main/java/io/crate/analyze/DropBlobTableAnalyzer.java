@@ -21,9 +21,10 @@
 
 package io.crate.analyze;
 
+import io.crate.auth.user.User;
 import io.crate.exceptions.ResourceUnknownException;
-import io.crate.metadata.Schemas;
 import io.crate.metadata.RelationName;
+import io.crate.metadata.Schemas;
 import io.crate.metadata.blob.BlobTableInfo;
 import io.crate.sql.tree.DropBlobTable;
 
@@ -37,12 +38,12 @@ class DropBlobTableAnalyzer {
         this.schemas = schemas;
     }
 
-    public DropBlobTableAnalyzedStatement analyze(DropBlobTable node) {
+    public DropBlobTableAnalyzedStatement analyze(User user, DropBlobTable node) {
         RelationName relationName = tableToIdent(node.table());
         BlobTableInfo tableInfo = null;
         boolean isNoop = false;
         try {
-            tableInfo = schemas.getTableInfo(relationName);
+            tableInfo = schemas.getTableInfo(user, relationName);
         } catch (ResourceUnknownException e) {
             if (node.ignoreNonExistentTable()) {
                 isNoop = true;

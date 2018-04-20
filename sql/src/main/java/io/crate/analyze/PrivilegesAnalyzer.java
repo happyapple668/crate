@@ -57,33 +57,33 @@ class PrivilegesAnalyzer {
         this.userManagementEnabled = userManagementEnabled;
     }
 
-    PrivilegesAnalyzedStatement analyzeGrant(GrantPrivilege node, User user, String defaultSchema) {
+    PrivilegesAnalyzedStatement analyzeGrant(GrantPrivilege node, User grantor, String defaultSchema) {
         ensureUserManagementEnabled();
         Privilege.Clazz clazz = Privilege.Clazz.valueOf(node.clazz());
-        List<String> idents = validatePrivilegeIdents(clazz, node.privilegeIdents(), false, defaultSchema);
+        List<String> idents = validatePrivilegeIdents(grantor, clazz, node.privilegeIdents(), false, defaultSchema);
 
         return new PrivilegesAnalyzedStatement(node.userNames(),
-            privilegeTypesToPrivileges(getPrivilegeTypes(node.all(), node.privileges()), user, State.GRANT, idents,
+            privilegeTypesToPrivileges(getPrivilegeTypes(node.all(), node.privileges()), grantor, State.GRANT, idents,
                 clazz));
     }
 
-    PrivilegesAnalyzedStatement analyzeRevoke(RevokePrivilege node, User user, String defaultSchema) {
+    PrivilegesAnalyzedStatement analyzeRevoke(RevokePrivilege node, User grantor, String defaultSchema) {
         ensureUserManagementEnabled();
         Privilege.Clazz clazz = Privilege.Clazz.valueOf(node.clazz());
-        List<String> idents = validatePrivilegeIdents(clazz, node.privilegeIdents(), true, defaultSchema);
+        List<String> idents = validatePrivilegeIdents(grantor, clazz, node.privilegeIdents(), true, defaultSchema);
 
         return new PrivilegesAnalyzedStatement(node.userNames(),
-            privilegeTypesToPrivileges(getPrivilegeTypes(node.all(), node.privileges()), user, State.REVOKE, idents,
+            privilegeTypesToPrivileges(getPrivilegeTypes(node.all(), node.privileges()), grantor, State.REVOKE, idents,
                 clazz));
     }
 
-    PrivilegesAnalyzedStatement analyzeDeny(DenyPrivilege node, User user, String defaultSchema) {
+    PrivilegesAnalyzedStatement analyzeDeny(DenyPrivilege node, User grantor, String defaultSchema) {
         ensureUserManagementEnabled();
         Privilege.Clazz clazz = Privilege.Clazz.valueOf(node.clazz());
-        List<String> idents = validatePrivilegeIdents(clazz, node.privilegeIdents(), false, defaultSchema);
+        List<String> idents = validatePrivilegeIdents(grantor, clazz, node.privilegeIdents(), false, defaultSchema);
 
         return new PrivilegesAnalyzedStatement(node.userNames(),
-            privilegeTypesToPrivileges(getPrivilegeTypes(node.all(), node.privileges()), user, State.DENY, idents,
+            privilegeTypesToPrivileges(getPrivilegeTypes(node.all(), node.privileges()), grantor, State.DENY, idents,
                 clazz));
     }
 
@@ -103,19 +103,19 @@ class PrivilegesAnalyzer {
         return privilegeTypes;
     }
 
-    private void validateTableNames(List<String> tableNames) {
+    private void validateTableNames(User grantee, List<String> tableNames) {
         tableNames.forEach(t -> {
             RelationName ident = RelationName.fromIndexName(t);
             validateSchemaName(ident.schema());
-            schemas.getTableInfo(ident);
+            schemas.getTableInfo(grantee, ident);
         });
     }
 
-    private void validateViewNames(List<String> viewNames) {
+    private void validateViewNames(User grantee, List<String> viewNames) {
         viewNames.forEach(t -> {
             RelationName ident = RelationName.fromIndexName(t);
             validateSchemaName(ident.schema());
-            if (schemas.resolveView(ident) == null) {
+            if (schemas.resolveView(grantee, ident) == null) {
                 throw new RelationUnknown(ident);
             }
         });
@@ -131,7 +131,8 @@ class PrivilegesAnalyzer {
         }
     }
 
-    private List<String> validatePrivilegeIdents(Privilege.Clazz clazz,
+    private List<String> validatePrivilegeIdents(User grantor,
+                                                 Privilege.Clazz clazz,
                                                  List<QualifiedName> tableOrSchemaNames,
                                                  boolean isRevoke,
                                                  String defaultSchema) {
@@ -143,9 +144,9 @@ class PrivilegesAnalyzer {
         if (Privilege.Clazz.SCHEMA.equals(clazz)) {
             validateSchemaNames(idents);
         } else if (Privilege.Clazz.TABLE.equals(clazz)) {
-            validateTableNames(idents);
+            validateTableNames(grantor, idents);
         } else if (Privilege.Clazz.VIEW.equals(clazz)) {
-            validateViewNames(idents);
+            validateViewNames(grantor, idents);
         }
 
         return idents;

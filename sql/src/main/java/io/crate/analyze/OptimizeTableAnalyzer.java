@@ -23,8 +23,9 @@
 package io.crate.analyze;
 
 import com.google.common.collect.ImmutableMap;
-import io.crate.metadata.Schemas;
+import io.crate.auth.user.User;
 import io.crate.metadata.RelationName;
+import io.crate.metadata.Schemas;
 import io.crate.metadata.blob.BlobTableInfo;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.metadata.settings.SettingsApplier;
@@ -62,6 +63,7 @@ class OptimizeTableAnalyzer {
 
     public OptimizeTableAnalyzedStatement analyze(OptimizeStatement stmt, Analysis analysis) {
         Set<String> indexNames = getIndexNames(
+            analysis.sessionContext().user(),
             stmt.tables(),
             schemas,
             analysis.parameterContext(),
@@ -75,13 +77,14 @@ class OptimizeTableAnalyzer {
         return new OptimizeTableAnalyzedStatement(indexNames, settings);
     }
 
-    private static Set<String> getIndexNames(List<Table> tables,
+    private static Set<String> getIndexNames(User user,
+                                             List<Table> tables,
                                              Schemas schemas,
                                              ParameterContext parameterContext,
                                              String defaultSchema) {
         Set<String> indexNames = new HashSet<>(tables.size());
         for (Table nodeTable : tables) {
-            TableInfo tableInfo = schemas.getTableInfo(RelationName.of(nodeTable, defaultSchema), Operation.OPTIMIZE);
+            TableInfo tableInfo = schemas.getTableInfo(user, RelationName.of(nodeTable, defaultSchema), Operation.OPTIMIZE);
             if (tableInfo instanceof BlobTableInfo) {
                 indexNames.add(((BlobTableInfo) tableInfo).concreteIndices()[0]);
             } else {

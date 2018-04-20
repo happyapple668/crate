@@ -24,6 +24,7 @@ package io.crate.analyze.relations;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import io.crate.action.sql.SessionContext;
 import io.crate.analyze.HavingClause;
 import io.crate.analyze.MultiSourceSelect;
 import io.crate.analyze.OrderBy;
@@ -41,6 +42,7 @@ import io.crate.analyze.relations.select.SelectAnalyzer;
 import io.crate.analyze.validator.GroupBySymbolValidator;
 import io.crate.analyze.validator.HavingSymbolValidator;
 import io.crate.analyze.validator.SemanticSortValidator;
+import io.crate.auth.user.User;
 import io.crate.exceptions.AmbiguousColumnAliasException;
 import io.crate.exceptions.ColumnUnknownException;
 import io.crate.exceptions.RelationUnknown;
@@ -669,14 +671,17 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
 
     @Override
     protected AnalyzedRelation visitTable(Table node, StatementAnalysisContext context) {
-        RelationName relationName = RelationName.of(node, context.sessionContext().defaultSchema());
-        TableInfo tableInfo = schemas.getTableInfoOrNull(relationName, context.currentOperation());
+        SessionContext sessionContext = context.sessionContext();
+        RelationName relationName = RelationName.of(node, sessionContext.defaultSchema());
+        User user = sessionContext.user();
+        TableInfo tableInfo = schemas.getTableInfoOrNull(user, relationName, context.currentOperation());
         final AnalyzedRelation relation;
         if (tableInfo == null) {
-            ViewMetaData view = schemas.resolveView(relationName);
+            ViewMetaData view = schemas.resolveView(user, relationName);
             if (view == null) {
                 throw new RelationUnknown(relationName);
             }
+            // TODO: switch to owner of view
             AnalyzedRelation resolvedView = process(SqlParser.createStatement(view.stmt()), context);
             if (!(resolvedView instanceof QueriedRelation)) {
                 throw new IllegalArgumentException("View must be a top-level SELECT statement, got: " + view.stmt());

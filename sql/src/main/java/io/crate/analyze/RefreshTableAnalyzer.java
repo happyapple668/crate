@@ -21,8 +21,9 @@
 
 package io.crate.analyze;
 
-import io.crate.metadata.Schemas;
+import io.crate.auth.user.User;
 import io.crate.metadata.RelationName;
+import io.crate.metadata.Schemas;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.metadata.table.Operation;
 import io.crate.sql.tree.RefreshStatement;
@@ -42,6 +43,7 @@ class RefreshTableAnalyzer {
 
     public RefreshTableAnalyzedStatement analyze(RefreshStatement refreshStatement, Analysis analysis) {
         return new RefreshTableAnalyzedStatement(getIndexNames(
+            analysis.sessionContext().user(),
             refreshStatement.tables(),
             schemas,
             analysis.parameterContext(),
@@ -49,14 +51,15 @@ class RefreshTableAnalyzer {
         ));
     }
 
-    private static Set<String> getIndexNames(List<Table> tables,
+    private static Set<String> getIndexNames(User user,
+                                             List<Table> tables,
                                              Schemas schemas,
                                              ParameterContext parameterContext,
                                              String defaultSchema) {
         Set<String> indexNames = new HashSet<>(tables.size());
         for (Table nodeTable : tables) {
             DocTableInfo tableInfo = schemas.getTableInfo(
-                RelationName.of(nodeTable, defaultSchema), Operation.REFRESH);
+                user, RelationName.of(nodeTable, defaultSchema), Operation.REFRESH);
             indexNames.addAll(TableAnalyzer.filteredIndices(
                     parameterContext,
                     nodeTable.partitionProperties(), tableInfo));

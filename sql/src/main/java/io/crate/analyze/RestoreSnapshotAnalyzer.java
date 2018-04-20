@@ -25,12 +25,13 @@ package io.crate.analyze;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.crate.action.sql.SessionContext;
 import io.crate.exceptions.PartitionAlreadyExistsException;
 import io.crate.exceptions.RelationAlreadyExists;
 import io.crate.execution.ddl.RepositoryService;
 import io.crate.metadata.PartitionName;
-import io.crate.metadata.Schemas;
 import io.crate.metadata.RelationName;
+import io.crate.metadata.Schemas;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.metadata.settings.SettingsApplier;
 import io.crate.metadata.settings.SettingsAppliers;
@@ -76,15 +77,17 @@ class RestoreSnapshotAnalyzer {
             List<Table> tableList = node.tableList().get();
             Set<RestoreSnapshotAnalyzedStatement.RestoreTableInfo> restoreTables = new HashSet<>(tableList.size());
             for (Table table : tableList) {
-                RelationName relationName = RelationName.of(table, analysis.sessionContext().defaultSchema());
-                boolean tableExists = schemas.tableExists(relationName);
+                SessionContext sessionContext = analysis.sessionContext();
+                RelationName relationName = RelationName.of(table, sessionContext.defaultSchema());
+                boolean tableExists = schemas.tableExists(sessionContext.user(), relationName);
 
                 if (tableExists) {
                     if (table.partitionProperties().isEmpty()) {
                         throw new RelationAlreadyExists(relationName);
                     }
 
-                    DocTableInfo docTableInfo = schemas.getTableInfo(relationName, Operation.RESTORE_SNAPSHOT);
+                    DocTableInfo docTableInfo = schemas.getTableInfo(
+                        sessionContext.user(), relationName, Operation.RESTORE_SNAPSHOT);
                     PartitionName partitionName = PartitionPropertiesAnalyzer.toPartitionName(
                         relationName,
                         docTableInfo,

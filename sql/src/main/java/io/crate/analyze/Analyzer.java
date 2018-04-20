@@ -303,17 +303,18 @@ public class Analyzer {
 
         @Override
         public AnalyzedStatement visitCreateBlobTable(CreateBlobTable node, Analysis context) {
-            return createBlobTableAnalyzer.analyze(node, context.parameterContext());
+            return createBlobTableAnalyzer.analyze(node, context.sessionContext().user(), context.parameterContext());
         }
 
         @Override
         public AnalyzedStatement visitDropBlobTable(DropBlobTable node, Analysis context) {
-            return dropBlobTableAnalyzer.analyze(node);
+            return dropBlobTableAnalyzer.analyze(context.sessionContext().user(), node);
         }
 
         @Override
         public AnalyzedStatement visitAlterBlobTable(AlterBlobTable node, Analysis context) {
-            return alterBlobTableAnalyzer.analyze(node, context.parameterContext().parameters());
+            return alterBlobTableAnalyzer.analyze(
+                context.sessionContext().user(), node, context.parameterContext().parameters());
         }
 
         @Override
@@ -417,7 +418,8 @@ public class Analyzer {
 
         @Override
         public AnalyzedStatement visitGrantPrivilege(GrantPrivilege node, Analysis context) {
-            return privilegesAnalyzer.analyzeGrant(node,
+            return privilegesAnalyzer.analyzeGrant(
+                node,
                 context.sessionContext().user(),
                 context.sessionContext().defaultSchema());
         }

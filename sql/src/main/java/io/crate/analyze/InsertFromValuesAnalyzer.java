@@ -118,7 +118,7 @@ class InsertFromValuesAnalyzer extends AbstractInsertAnalyzer {
         }
 
         RelationName relationName = RelationName.of(insert.table(), txnCtx.sessionContext().defaultSchema());
-        DocTableInfo targetTable = schemas.getTableInfo(relationName, Operation.INSERT);
+        DocTableInfo targetTable = schemas.getTableInfo(txnCtx.sessionContext().user(), relationName, Operation.INSERT);
         DocTableRelation tableRelation = new DocTableRelation(targetTable);
 
         ExpressionAnalyzer exprAnalyzer = new ExpressionAnalyzer(
@@ -167,6 +167,7 @@ class InsertFromValuesAnalyzer extends AbstractInsertAnalyzer {
 
     public AnalyzedStatement analyze(InsertFromValues node, Analysis analysis) {
         DocTableInfo tableInfo = schemas.getTableInfo(
+            analysis.sessionContext().user(),
             RelationName.of(node.table(), analysis.sessionContext().defaultSchema()),
             Operation.INSERT
         );

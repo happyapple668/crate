@@ -24,6 +24,7 @@ package io.crate.analyze;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import io.crate.action.sql.SessionContext;
 import io.crate.analyze.copy.NodeFilters;
 import io.crate.analyze.expressions.ExpressionAnalysisContext;
 import io.crate.analyze.expressions.ExpressionAnalyzer;
@@ -99,8 +100,12 @@ class CopyAnalyzer {
     }
 
     CopyFromAnalyzedStatement convertCopyFrom(CopyFrom node, Analysis analysis) {
+        SessionContext sessionContext = analysis.sessionContext();
         DocTableInfo tableInfo = schemas.getTableInfo(
-            RelationName.of(node.table(), analysis.sessionContext().defaultSchema()), Operation.INSERT);
+            sessionContext.user(),
+            RelationName.of(node.table(), sessionContext.defaultSchema()),
+            Operation.INSERT
+        );
         DocTableRelation tableRelation = new DocTableRelation(tableInfo);
 
         String partitionIdent = null;
@@ -169,8 +174,12 @@ class CopyAnalyzer {
             throw new UnsupportedOperationException("Using COPY TO without specifying a DIRECTORY is not supported");
         }
 
+        SessionContext sessionContext = analysis.sessionContext();
         TableInfo tableInfo = schemas.getTableInfo(
-            RelationName.of(node.table(), analysis.sessionContext().defaultSchema()), Operation.COPY_TO);
+            sessionContext.user(),
+            RelationName.of(node.table(), sessionContext.defaultSchema()),
+            Operation.COPY_TO
+        );
         Operation.blockedRaiseException(tableInfo, Operation.READ);
         DocTableRelation tableRelation = new DocTableRelation((DocTableInfo) tableInfo);
 

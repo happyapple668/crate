@@ -24,18 +24,19 @@ package io.crate.analyze;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.crate.analyze.expressions.ValueNormalizer;
-import io.crate.expression.symbol.Literal;
-import io.crate.expression.symbol.Symbol;
+import io.crate.auth.user.User;
 import io.crate.exceptions.ColumnUnknownException;
 import io.crate.exceptions.ColumnValidationException;
 import io.crate.exceptions.InvalidColumnNameException;
+import io.crate.expression.symbol.Literal;
+import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.Reference;
 import io.crate.metadata.ReferenceIdent;
+import io.crate.metadata.RelationName;
 import io.crate.metadata.Routing;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.Schemas;
-import io.crate.metadata.RelationName;
 import io.crate.metadata.table.ColumnPolicy;
 import io.crate.metadata.table.TableInfo;
 import io.crate.metadata.table.TestingTableInfo;
@@ -84,7 +85,7 @@ public class ValueNormalizerTest extends CrateUnitTest {
     @Before
     public void prepare() {
         Schemas schemas = mock(Schemas.class);
-        when(schemas.getTableInfo(TEST_TABLE_IDENT)).thenReturn(userTableInfo);
+        when(schemas.getTableInfo(User.CRATE_USER, TEST_TABLE_IDENT)).thenReturn(userTableInfo);
     }
 
     @Test

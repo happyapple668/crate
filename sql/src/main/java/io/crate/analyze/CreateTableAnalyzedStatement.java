@@ -21,6 +21,7 @@
 
 package io.crate.analyze;
 
+import io.crate.auth.user.User;
 import io.crate.exceptions.RelationAlreadyExists;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.IndexMappings;
@@ -45,10 +46,10 @@ public class CreateTableAnalyzedStatement extends AbstractDDLAnalyzedStatement {
     public CreateTableAnalyzedStatement() {
     }
 
-    public void table(RelationName relationName, boolean ifNotExists, Schemas schemas) {
+    public void table(User user, RelationName relationName, boolean ifNotExists, Schemas schemas) {
         relationName.ensureValidForRelationCreation();
-        boolean tableExists = schemas.tableExists(relationName);
-        boolean viewExists = schemas.viewExists(relationName);
+        boolean tableExists = schemas.tableExists(user, relationName);
+        boolean viewExists = schemas.viewExists(user, relationName);
         if (ifNotExists && !viewExists) {
             noOp = tableExists;
         } else if (tableExists || viewExists) {

@@ -23,6 +23,7 @@
 package io.crate.ingestion;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.crate.auth.user.User;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.cluster.DDLClusterStateService;
@@ -128,7 +129,7 @@ public class IngestionService extends AbstractLifecycleComponent implements Clus
             //noinspection Java8CollectionRemoveIf - would result in a lambda instance for every iteration
             while (rulesIterator.hasNext()) {
                 IngestRule ingestRule = rulesIterator.next();
-                if (schemas.tableExists(RelationName.fromIndexName(ingestRule.getTargetTable())) == false) {
+                if (schemas.tableExists(User.CRATE_USER, RelationName.fromIndexName(ingestRule.getTargetTable())) == false) {
                     rulesIterator.remove();
                 }
             }

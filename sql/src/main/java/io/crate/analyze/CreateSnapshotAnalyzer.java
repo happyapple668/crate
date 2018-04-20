@@ -25,6 +25,7 @@ package io.crate.analyze;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.crate.action.sql.SessionContext;
 import io.crate.exceptions.PartitionUnknownException;
 import io.crate.exceptions.ResourceUnknownException;
 import io.crate.execution.ddl.RepositoryService;
@@ -97,8 +98,10 @@ class CreateSnapshotAnalyzer {
             for (Table table : node.tableList()) {
                 DocTableInfo docTableInfo;
                 try {
+                    SessionContext sessionContext = analysis.sessionContext();
                     docTableInfo = schemas.getTableInfo(
-                        RelationName.of(table, analysis.sessionContext().defaultSchema()), Operation.CREATE_SNAPSHOT);
+                        sessionContext.user(),
+                        RelationName.of(table, sessionContext.defaultSchema()), Operation.CREATE_SNAPSHOT);
                 } catch (ResourceUnknownException e) {
                     if (ignoreUnavailable) {
                         LOGGER.info("ignoring: {}", e.getMessage());

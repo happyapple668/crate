@@ -21,6 +21,7 @@
 
 package io.crate.analyze;
 
+import io.crate.action.sql.SessionContext;
 import io.crate.analyze.expressions.ExpressionAnalysisContext;
 import io.crate.analyze.expressions.ExpressionAnalyzer;
 import io.crate.analyze.expressions.ValueNormalizer;
@@ -108,7 +109,7 @@ class InsertFromSubQueryAnalyzer {
 
     public AnalyzedInsertStatement analyze(InsertFromSubquery insert, ParamTypeHints typeHints, TransactionContext txnCtx) {
         RelationName relationName = RelationName.of(insert.table(), txnCtx.sessionContext().defaultSchema());
-        DocTableInfo targetTable = schemas.getTableInfo(relationName, Operation.INSERT);
+        DocTableInfo targetTable = schemas.getTableInfo(txnCtx.sessionContext().user(), relationName, Operation.INSERT);
         DocTableRelation tableRelation = new DocTableRelation(targetTable);
 
         QueriedRelation subQueryRelation =
@@ -131,8 +132,10 @@ class InsertFromSubQueryAnalyzer {
     }
 
     public AnalyzedStatement analyze(InsertFromSubquery node, Analysis analysis) {
+        SessionContext sessionContext = analysis.sessionContext();
         DocTableInfo tableInfo = schemas.getTableInfo(
-            RelationName.of(node.table(), analysis.sessionContext().defaultSchema()),
+            sessionContext.user(),
+            RelationName.of(node.table(), sessionContext.defaultSchema()),
             Operation.INSERT);
 
         DocTableRelation tableRelation = new DocTableRelation(tableInfo);

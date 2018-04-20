@@ -22,6 +22,7 @@
 package io.crate.metadata.shard;
 
 import com.google.common.collect.ImmutableMap;
+import io.crate.auth.user.User;
 import io.crate.exceptions.ResourceUnknownException;
 import io.crate.exceptions.UnhandledServerException;
 import io.crate.expression.NestableInput;
@@ -110,7 +111,7 @@ public class ShardReferenceResolver {
         }
         RelationName relationName = partitionName.tableIdent();
         try {
-            DocTableInfo info = schemas.getTableInfo(relationName);
+            DocTableInfo info = schemas.getTableInfo(User.CRATE_USER, relationName);
             if (!schemas.isOrphanedAlias(info)) {
                 assert info.isPartitioned() : "table must be partitioned";
                 int i = 0;

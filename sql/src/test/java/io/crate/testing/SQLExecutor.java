@@ -44,6 +44,7 @@ import io.crate.analyze.relations.RelationNormalizer;
 import io.crate.analyze.relations.StatementAnalysisContext;
 import io.crate.analyze.repositories.RepositoryParamValidator;
 import io.crate.analyze.repositories.RepositorySettingsModule;
+import io.crate.auth.user.AccessControl;
 import io.crate.auth.user.User;
 import io.crate.data.Row;
 import io.crate.data.RowN;

@@ -21,6 +21,7 @@
 
 package io.crate.analyze;
 
+import io.crate.auth.user.User;
 import io.crate.exceptions.RelationAlreadyExists;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
@@ -42,9 +43,9 @@ public class CreateBlobTableAnalyzedStatement extends AbstractDDLAnalyzedStateme
         return relationName;
     }
 
-    public void table(RelationName relationName, Schemas schemas) {
+    public void table(User user, RelationName relationName, Schemas schemas) {
         relationName.ensureValidForRelationCreation();
-        if (schemas.tableExists(relationName)) {
+        if (schemas.tableExists(user, relationName)) {
             throw new RelationAlreadyExists(relationName);
         }
         this.relationName = relationName;

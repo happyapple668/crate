@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.crate.action.sql.ResultReceiver;
 import io.crate.action.sql.SQLOperations;
 import io.crate.action.sql.Session;
+import io.crate.auth.user.User;
 import io.crate.data.Row;
 import io.crate.exceptions.RelationUnknown;
 import io.crate.metadata.PartitionName;
@@ -145,7 +146,7 @@ public class TableHealthService extends AbstractComponent {
                 BytesRefs.toString(ident.tableSchema), BytesRefs.toString(ident.tableName));
             DocTableInfo tableInfo;
             try {
-                tableInfo = schemas.getTableInfo(relationName);
+                tableInfo = schemas.getTableInfo(User.CRATE_USER, relationName);
             } catch (RelationUnknown e) {
                 continue;
             }

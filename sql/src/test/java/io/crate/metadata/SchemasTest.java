@@ -22,14 +22,15 @@
 package io.crate.metadata;
 
 import com.google.common.collect.ImmutableList;
+import io.crate.auth.user.User;
 import io.crate.exceptions.OperationOnInaccessibleRelationException;
+import io.crate.expression.udf.UserDefinedFunctionMetaData;
+import io.crate.expression.udf.UserDefinedFunctionsMetaData;
 import io.crate.metadata.doc.DocSchemaInfoFactory;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.metadata.table.Operation;
 import io.crate.metadata.table.SchemaInfo;
 import io.crate.metadata.table.TableInfo;
-import io.crate.expression.udf.UserDefinedFunctionMetaData;
-import io.crate.expression.udf.UserDefinedFunctionsMetaData;
 import io.crate.metadata.view.ViewsMetaData;
 import io.crate.metadata.view.ViewsMetaDataTest;
 import io.crate.types.DataTypes;
@@ -97,7 +98,7 @@ public class SchemasTest {
         when(schemaInfo.name()).thenReturn(relationName.schema());
 
         Schemas schemas = getReferenceInfos(schemaInfo);
-        schemas.getTableInfo(relationName, Operation.INSERT);
+        schemas.getTableInfo(User.CRATE_USER, relationName, Operation.INSERT);
     }
 
     @Test
@@ -115,7 +116,7 @@ public class SchemasTest {
 
 
         Schemas schemas = getReferenceInfos(schemaInfo);
-        schemas.getTableInfo(relationName, Operation.INSERT);
+        schemas.getTableInfo(User.CRATE_USER, relationName, Operation.INSERT);
     }
 
     @Test
@@ -180,6 +181,7 @@ public class SchemasTest {
     private Schemas getReferenceInfos(SchemaInfo schemaInfo) {
         Map<String, SchemaInfo> builtInSchema = new HashMap<>();
         builtInSchema.put(schemaInfo.name(), schemaInfo);
-        return new Schemas(Settings.EMPTY, builtInSchema, clusterService, mock(DocSchemaInfoFactory.class));
+        return new Schemas(
+            Settings.EMPTY, builtInSchema, clusterService, mock(DocSchemaInfoFactory.class));
     }
 }

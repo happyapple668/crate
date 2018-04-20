@@ -21,6 +21,7 @@
 
 package io.crate.analyze;
 
+import io.crate.auth.user.User;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
 import io.crate.sql.tree.ClusteredBy;
@@ -39,10 +40,10 @@ class CreateBlobTableAnalyzer {
         this.numberOfShards = numberOfShards;
     }
 
-    public CreateBlobTableAnalyzedStatement analyze(CreateBlobTable node, ParameterContext parameterContext) {
+    public CreateBlobTableAnalyzedStatement analyze(CreateBlobTable node, User user, ParameterContext parameterContext) {
         CreateBlobTableAnalyzedStatement statement = new CreateBlobTableAnalyzedStatement();
         RelationName relationName = BlobTableAnalyzer.tableToIdent(node.name());
-        statement.table(relationName, schemas);
+        statement.table(user, relationName, schemas);
 
         int numShards;
         Optional<ClusteredBy> clusteredBy = node.clusteredBy();

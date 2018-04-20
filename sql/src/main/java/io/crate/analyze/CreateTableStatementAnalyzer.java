@@ -21,6 +21,7 @@
 
 package io.crate.analyze;
 
+import io.crate.action.sql.SessionContext;
 import io.crate.analyze.expressions.ExpressionToStringVisitor;
 import io.crate.data.Row;
 import io.crate.metadata.ColumnIdent;
@@ -83,8 +84,9 @@ public class CreateTableStatementAnalyzer extends DefaultTraversalVisitor<Create
                                                 TransactionContext transactionContext) {
         CreateTableAnalyzedStatement statement = new CreateTableAnalyzedStatement();
         Row parameters = parameterContext.parameters();
-        RelationName relationName = RelationName.of(createTable.name(), transactionContext.sessionContext().defaultSchema());
-        statement.table(relationName, createTable.ifNotExists(), schemas);
+        SessionContext sessionContext = transactionContext.sessionContext();
+        RelationName relationName = RelationName.of(createTable.name(), sessionContext.defaultSchema());
+        statement.table(sessionContext.user(), relationName, createTable.ifNotExists(), schemas);
 
         // apply default in case it is not specified in the genericProperties,
         // if it is it will get overwritten afterwards.
