@@ -99,6 +99,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 @Singleton
@@ -269,19 +270,20 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
     @Override
     protected AnalyzedRelation visitQuerySpecification(QuerySpecification node, StatementAnalysisContext statementContext) {
         List<Relation> from = node.getFrom().isEmpty() ? EMPTY_ROW_TABLE_RELATION : node.getFrom();
-        statementContext.startRelation();
+        RelationAnalysisContext currentRelationContext = statementContext.startRelation();
 
-        // JOINS in the from clause have precedence over regular tables or subqueries
-        List<Relation> deferredRelations = new ArrayList<>(from.size());
         for (Relation relation : from) {
-            if (relation instanceof Join) {
-                process(relation, statementContext);
-            } else {
-                deferredRelations.add(relation);
-            }
-        }
-        for (Relation relation : deferredRelations) {
+            // different from relations have to be isolated from each other
+            RelationAnalysisContext innerContext = statementContext.startRelation();
             process(relation, statementContext);
+            statementContext.endRelation();
+            for (Map.Entry<QualifiedName, AnalyzedRelation> entry : innerContext.sources().entrySet()) {
+                currentRelationContext.addSourceRelation(entry.getKey(), entry.getValue());
+            }
+            currentRelationContext.sources().putAll(innerContext.sources());
+            for (JoinPair joinPair : innerContext.joinPairs()) {
+                currentRelationContext.addJoinPair(joinPair);
+            }
         }
 
         RelationAnalysisContext context = statementContext.currentRelationContext();
