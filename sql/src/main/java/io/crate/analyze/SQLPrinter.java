@@ -55,12 +55,16 @@ public final class SQLPrinter {
 
     public String format(AnalyzedStatement stmt) {
         StringBuilder sb = new StringBuilder();
-        if (stmt instanceof QueriedRelation) {
+        if (canPrint(stmt)) {
             visitor.process(((QueriedRelation) stmt), sb);
         } else {
             throw new UnsupportedOperationException("Cannot format " + stmt);
         }
         return sb.toString();
+    }
+
+    public boolean canPrint(AnalyzedStatement stmt) {
+        return stmt instanceof QueriedRelation;
     }
 
     private static class Visitor extends AnalyzedRelationVisitor<StringBuilder, Void> {
