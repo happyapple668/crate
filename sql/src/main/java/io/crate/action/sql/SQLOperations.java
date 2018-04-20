@@ -93,18 +93,16 @@ public class SQLOperations {
     public Session newSystemSession() {
         return createSession(new SessionContext(
             SysSchemaInfo.NAME,
-            CRATE_USER,
-            userManager.getStatementValidator(CRATE_USER))
-        );
+            CRATE_USER
+        ));
     }
 
     public Session createSession(@Nullable String defaultSchema, User user) {
-        return createSession(new SessionContext(defaultSchema, user, userManager.getStatementValidator(user)));
+        return createSession(new SessionContext(defaultSchema, user));
     }
 
     public Session createSession(@Nullable String defaultSchema, User user, Set<Option> options, int defaultLimit) {
-        return createSession(new SessionContext(
-            defaultLimit, options, defaultSchema, user, userManager.getStatementValidator(user)));
+        return createSession(new SessionContext(defaultLimit, options, defaultSchema, user));
     }
 
     /**

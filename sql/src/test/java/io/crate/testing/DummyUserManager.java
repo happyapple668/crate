@@ -23,7 +23,6 @@
 package io.crate.testing;
 
 import io.crate.analyze.user.Privilege;
-import io.crate.auth.user.StatementAuthorizedValidator;
 import io.crate.auth.user.User;
 import io.crate.auth.user.UserManager;
 import io.crate.user.SecureHash;
@@ -58,10 +57,5 @@ public class DummyUserManager implements UserManager {
     @Override
     public CompletableFuture<Long> applyPrivileges(Collection<String> userNames, Collection<Privilege> privileges) {
         return null;
-    }
-
-    @Override
-    public StatementAuthorizedValidator getStatementValidator(@Nullable User user) {
-        return s -> {};
     }
 }

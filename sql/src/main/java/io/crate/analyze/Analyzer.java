@@ -205,7 +205,6 @@ public class Analyzer {
     public Analysis boundAnalyze(Statement statement, TransactionContext transactionContext, ParameterContext parameterContext) {
         Analysis analysis = new Analysis(transactionContext, parameterContext, ParamTypeHints.EMPTY);
         AnalyzedStatement analyzedStatement = analyzedStatement(statement, analysis);
-        transactionContext.sessionContext().ensureStatementAuthorized(analyzedStatement);
         analysis.analyzedStatement(analyzedStatement);
         return analysis;
     }

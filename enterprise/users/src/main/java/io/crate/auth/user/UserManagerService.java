@@ -18,11 +18,9 @@
 
 package io.crate.auth.user;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.crate.action.FutureActionListener;
 import io.crate.analyze.user.Privilege;
-import io.crate.exceptions.UnauthorizedException;
 import io.crate.exceptions.UserAlreadyExistsException;
 import io.crate.exceptions.UserUnknownException;
 import io.crate.execution.engine.collect.sources.SysTableRegistry;
@@ -51,14 +49,6 @@ import static io.crate.auth.user.User.CRATE_USER;
 
 @Singleton
 public class UserManagerService implements UserManager, ClusterStateListener {
-
-    @VisibleForTesting
-    static final StatementAuthorizedValidator BYPASS_AUTHORIZATION_CHECKS = s -> {
-    };
-
-    static final StatementAuthorizedValidator ALWAYS_FAIL_STATEMENT_VALIDATOR = s -> {
-        throw new UnauthorizedException("User `null` is not authorized to execute statement");
-    };
 
     private static final Consumer<User> ENSURE_DROP_USER_NOT_SUPERUSER = user -> {
         if (user != null && user.isSuperUser()) {
@@ -179,17 +169,6 @@ public class UserManagerService implements UserManager, ClusterStateListener {
 
     public Iterable<User> users() {
         return users;
-    }
-
-    @Override
-    public StatementAuthorizedValidator getStatementValidator(@Nullable User user) {
-        if (user == null) {
-            return ALWAYS_FAIL_STATEMENT_VALIDATOR;
-        }
-        if (user.isSuperUser()) {
-            return BYPASS_AUTHORIZATION_CHECKS;
-        }
-        return new StatementPrivilegeValidator(this, user);
     }
 
     @Override

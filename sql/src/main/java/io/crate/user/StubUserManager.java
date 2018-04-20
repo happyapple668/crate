@@ -23,7 +23,6 @@
 package io.crate.user;
 
 import io.crate.analyze.user.Privilege;
-import io.crate.auth.user.StatementAuthorizedValidator;
 import io.crate.auth.user.User;
 import io.crate.auth.user.UserManager;
 import io.crate.concurrent.CompletableFutures;
@@ -68,11 +67,5 @@ public class StubUserManager implements UserManager {
     public User findUser(String userName) {
         // Without enterprise enabled everything runs as super user
         return User.CRATE_USER;
-    }
-
-    @Override
-    public StatementAuthorizedValidator getStatementValidator(@Nullable User user) {
-        return s -> {
-        };
     }
 }

@@ -22,8 +22,6 @@
 
 package io.crate.action.sql;
 
-import io.crate.analyze.AnalyzedStatement;
-import io.crate.auth.user.StatementAuthorizedValidator;
 import io.crate.auth.user.User;
 import io.crate.metadata.Schemas;
 
@@ -32,33 +30,28 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
-public class SessionContext implements StatementAuthorizedValidator {
+public class SessionContext {
 
     private final int defaultLimit;
     private final Set<Option> options;
     private final User user;
-    private final StatementAuthorizedValidator statementAuthorizedValidator;
 
     private String defaultSchema;
     private boolean semiJoinsRewriteEnabled;
     private boolean hashJoinEnabled = true;
 
     public SessionContext(@Nullable String defaultSchema,
-                          User user,
-                          StatementAuthorizedValidator statementAuthorizedValidator) {
-        this(0, Option.NONE, defaultSchema, user,
-            statementAuthorizedValidator);
+                          User user) {
+        this(0, Option.NONE, defaultSchema, user);
     }
 
     public SessionContext(int defaultLimit,
                           Set<Option> options,
                           @Nullable String defaultSchema,
-                          User user,
-                          StatementAuthorizedValidator statementAuthorizedValidator) {
+                          User user) {
         this.defaultLimit = defaultLimit;
         this.options = options;
         this.user = requireNonNull(user, "User is required");
-        this.statementAuthorizedValidator = statementAuthorizedValidator;
         this.defaultSchema = defaultSchema;
         if (defaultSchema == null) {
             resetSchema();
@@ -108,11 +101,6 @@ public class SessionContext implements StatementAuthorizedValidator {
         return defaultLimit;
     }
 
-    @Override
-    public void ensureStatementAuthorized(AnalyzedStatement statement) {
-        statementAuthorizedValidator.ensureStatementAuthorized(statement);
-    }
-
     /**
      * Creates a new SessionContext with default settings.
      */
@@ -125,6 +113,6 @@ public class SessionContext implements StatementAuthorizedValidator {
      * Note: User can only set at the beginning of session.
      */
     public static SessionContext create(User user) {
-        return new SessionContext(null, user, s -> { });
+        return new SessionContext(null, user);
     }
 }

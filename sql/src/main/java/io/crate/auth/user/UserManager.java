@@ -71,10 +71,4 @@ public interface UserManager extends UserLookup {
      * @return a future which returns the number of privileges which were successfully applied
      */
     CompletableFuture<Long> applyPrivileges(Collection<String> userNames, Collection<Privilege> privileges);
-
-    /**
-     * Look up a statement authorization validator for the given user.
-     * All statements will be validated by this before planning/executing.
-     */
-    StatementAuthorizedValidator getStatementValidator(@Nullable User user);
 }
