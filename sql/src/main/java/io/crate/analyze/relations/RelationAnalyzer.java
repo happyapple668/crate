@@ -280,7 +280,6 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
             for (Map.Entry<QualifiedName, AnalyzedRelation> entry : innerContext.sources().entrySet()) {
                 currentRelationContext.addSourceRelation(entry.getKey(), entry.getValue());
             }
-            currentRelationContext.sources().putAll(innerContext.sources());
             for (JoinPair joinPair : innerContext.joinPairs()) {
                 currentRelationContext.addJoinPair(joinPair);
             }
